@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { MapView, Location, Permissions, Constants } from 'expo';
+import { MapView, Location, Permissions } from 'expo';
 import {View, Text} from 'react-native';
 
 export default class Map extends Component {
@@ -38,15 +38,34 @@ export default class Map extends Component {
   render () {
     console.log("my region", this.state);
     return (
-      <View style={{flex: 1}} >
-        <MapView
-          style={{ flex: 1 }}
-          region={this.state.region}
-          onRegionChange={this._handleMapRegionChange}
-          showsUserLocation
-          loadingEnabled
-        />
-      </View>
+      <React.Fragment>
+        { this.state.locationResult === null ?
+          <View style={{flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center'}}>
+          <Text>Finding your current location...</Text>
+          </View> :
+          this.state.hasLocationPermissions === false ?
+            <View style={{flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',}}>
+              <Text>Location permissions are not granted.</Text>
+            </View> :
+            this.state.mapRegion === null ?
+            <View>
+              <Text>Map region doesn't exist.</Text>
+            </View> :
+        <View style={{flex: 1}} >
+          <MapView
+            style={{ flex: 1 }}
+            region={this.state.region}
+            onRegionChange={this._handleMapRegionChange}
+            showsUserLocation
+            loadingEnabled
+          />
+        </View>
+        }
+      </React.Fragment>
     )
   }
 }
