@@ -36,24 +36,16 @@ export default class Map extends Component {
    };
 
   render () {
-    console.log("my region", this.state.region);
+    console.log("my region", this.state);
     return (
-
-      <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ecf0f1'}} >
-        {this.state.locationResult === null ? 
-            <Text>Finding your current location...</Text> :
-          this.state.hasLocationPermissions === false ?
-            <Text>Location permissions are not granted.</Text> :
-          this.state.region === null ?
-            <Text>Map region doesn exits</Text> :
-            <MapView
-              style={{ flex: 1 }}
-              region={this.state.region}
-              onRegionChange={this._handleMapRegionChange}
-              showsUserLocation
-              loadingEnabled
-            />
-        }
+      <View style={{flex: 1}} >
+        <MapView
+          style={{ flex: 1 }}
+          region={this.state.region}
+          onRegionChange={this._handleMapRegionChange}
+          showsUserLocation
+          loadingEnabled
+        />
       </View>
     )
   }
