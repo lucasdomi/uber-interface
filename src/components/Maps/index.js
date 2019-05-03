@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import { MapView, Location, Permissions } from 'expo';
 import {View, Text} from 'react-native';
-
+import Search from '../Search';
 export default class Map extends Component {
   state = {
     region: null,
@@ -55,15 +55,16 @@ export default class Map extends Component {
             <View>
               <Text>Map region doesn't exist.</Text>
             </View> :
-        <View style={{flex: 1}} >
-          <MapView
-            style={{ flex: 1 }}
-            region={this.state.region}
-            onRegionChange={this._handleMapRegionChange}
-            showsUserLocation
-            loadingEnabled
-          />
-        </View>
+            <View style={{flex: 1}} >
+              <MapView
+                style={{ flex: 1 }}
+                region={this.state.region}
+                onRegionChange={this._handleMapRegionChange}
+                showsUserLocation
+                loadingEnabled
+              />
+              <Search />
+            </View>
         }
       </React.Fragment>
     )
