@@ -21,7 +21,6 @@ export default class Map extends Component {
     destination: null,
     duration: null,
     myLocation: null,
-    calc: false,
   };
 
   componentDidMount () {
@@ -29,7 +28,6 @@ export default class Map extends Component {
   }
 
   _handleMapRegionChange = region => {
-    if(this.state.calc === false)
       this.setState({ region});
   };
 
@@ -50,7 +48,7 @@ export default class Map extends Component {
     this.setState({ locationResult: JSON.stringify(location) });
 
     // Center the map on the location we just fetched.
-    if (this.state.calc === false) {
+    
       console.log("entrou")
       this.setState({
         myLocation, 
@@ -59,10 +57,9 @@ export default class Map extends Component {
           longitude: location.coords.longitude, 
           latitudeDelta: 0.0922, 
           longitudeDelta: 0.0421,
-          calc: true
         }
       });
-    }
+    
 
      
    };
@@ -81,7 +78,6 @@ export default class Map extends Component {
   handleBack = () => {
     this.setState({
       destination: null,
-      calc: false,
     })
   }
 
@@ -106,7 +102,6 @@ export default class Map extends Component {
               <Text>Map region doesn't exist.</Text>
             </View> :
             <View style={{flex: 1}} >
-              {console.log("calculo:",region)}
               <MapView
                 style={{ flex: 1 }}
                 region={region}
