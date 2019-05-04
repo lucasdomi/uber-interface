@@ -9,6 +9,8 @@ import markerImage from '../../../assets/marker.png'
 import Geocoder from 'react-native-geocoding'
 import backImage from '../../../assets/back.png'
 import Details from '../Details';
+
+
 Geocoder.init('AIzaSyDJlJg5YjzbBYktHJynrpzBxw0v-xqXjSw')
 
 export default class Map extends Component {
@@ -19,6 +21,7 @@ export default class Map extends Component {
     destination: null,
     duration: null,
     myLocation: null,
+    calc: false,
   };
 
   componentDidMount () {
@@ -26,7 +29,8 @@ export default class Map extends Component {
   }
 
   _handleMapRegionChange = region => {
-    this.setState({ region });
+    if(this.state.calc === false)
+      this.setState({ region});
   };
 
   _getLocationAsync = async () => {
@@ -38,17 +42,27 @@ export default class Map extends Component {
     } else {
       this.setState({ hasLocationPermissions: true });
     }
-
+    
     let location = await Location.getCurrentPositionAsync({});
-    // console.log(location.coords.latitude)
     const response = await Geocoder.from (location.coords.latitude, location.coords.longitude);
     const address = response.results[0].formatted_address;
     const myLocation = address.substring(0, address.indexOf(','));
-    console.log(myLocation);
     this.setState({ locationResult: JSON.stringify(location) });
 
     // Center the map on the location we just fetched.
-    this.setState({myLocation, region: { latitude: location.coords.latitude, longitude: location.coords.longitude, latitudeDelta: 0.0922, longitudeDelta: 0.0421 }});
+    if (this.state.calc === false) {
+      console.log("entrou")
+      this.setState({
+        myLocation, 
+        region: { 
+          latitude: location.coords.latitude, 
+          longitude: location.coords.longitude, 
+          latitudeDelta: 0.0922, 
+          longitudeDelta: 0.0421,
+          calc: true
+        }
+      });
+    }
 
      
    };
@@ -66,11 +80,13 @@ export default class Map extends Component {
 
   handleBack = () => {
     this.setState({
-      destination: null
+      destination: null,
+      calc: false,
     })
   }
 
   render () {
+    const {region, destination} = this.state;
     return (
       <React.Fragment>
         { this.state.locationResult === null ?
@@ -90,10 +106,11 @@ export default class Map extends Component {
               <Text>Map region doesn't exist.</Text>
             </View> :
             <View style={{flex: 1}} >
+              {console.log("calculo:",region)}
               <MapView
                 style={{ flex: 1 }}
-                region={this.state.region}
-                onRegionChange={this._handleMapRegionChange}
+                region={region}
+                onRegionChangeEnd={this._handleMapRegionChange}
                 showsUserLocation
                 loadingEnabled
                 ref = {el => this.mapView = el}
@@ -101,9 +118,9 @@ export default class Map extends Component {
                 {this.state.destination && (
                   <Fragment>
                     <MapViewDirections 
-                      origin={this.state.region}
+                      origin={region}
                       apikey="AIzaSyDJlJg5YjzbBYktHJynrpzBxw0v-xqXjSw"
-                      destination={this.state.destination}
+                      destination={destination}
                       onReady = {result => {
                         this.setState({duration: Math.floor(result.duration)})
                         this.mapView.fitToCoordinates(result.coordinates, {
@@ -118,18 +135,19 @@ export default class Map extends Component {
                       }}
                     />
                     <MapView.Marker
-                        coordinate={this.state.destination}
-                        anchor= {{x: 0, y: 0}}
-                        image={markerImage}>
+                      coordinate={destination}
+                      anchor= {{x: 0, y: 0}}
+                      image={markerImage}
+                    >
                       <LocationBox>
-                        <LocationText>{this.state.destination.title}</LocationText>
+                        <LocationText>{destination.title}</LocationText>
                       </LocationBox>
                     </MapView.Marker>
 
                     <MapView.Marker
-                        coordinate={this.state.region}
-                        anchor= {{x: 0, y: 0}}
-                      >
+                      coordinate={region}
+                      anchor= {{x: 0, y: 0}}
+                    >
                       <LocationBox>
                         <LocationTimeBox>
                           <LocationTimeText>{this.state.duration}</LocationTimeText>
