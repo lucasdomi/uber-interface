@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import { MapView, Location, Permissions } from 'expo';
-import {View, Text} from 'react-native';
+import { View, Text} from 'react-native';
 import Search from '../Search';
+
 export default class Map extends Component {
   state = {
     region: null,
@@ -14,7 +15,6 @@ export default class Map extends Component {
   }
 
   _handleMapRegionChange = region => {
-    console.log(region);
     this.setState({ region });
   };
 
@@ -36,7 +36,6 @@ export default class Map extends Component {
    };
 
   render () {
-    console.log("my region", this.state);
     return (
       <React.Fragment>
         { this.state.locationResult === null ?
