@@ -1,12 +1,15 @@
 import React, {Component, Fragment} from 'react';
 import { MapView, Location, Permissions } from 'expo';
-import { View, Text} from 'react-native';
+import { View, Text, Image} from 'react-native';
 import Search from '../Search';
-// import Directions from '../Directions';
 import { getPixelSize } from '../../utils'
 import MapViewDirections from '../Directions';
-import {LocationBox, LocationText, LocationTimeText, LocationTimeTextSmall, LocationTimeBox} from './styles'
+import {LocationBox, LocationText, LocationTimeText, LocationTimeTextSmall, LocationTimeBox, Back} from './styles'
 import markerImage from '../../../assets/marker.png'
+import Geocoder from 'react-native-geocoding'
+import backImage from '../../../assets/back.png'
+import Details from '../Details';
+Geocoder.init('AIzaSyDJlJg5YjzbBYktHJynrpzBxw0v-xqXjSw')
 
 export default class Map extends Component {
   state = {
@@ -14,6 +17,8 @@ export default class Map extends Component {
     hasLocationPermissions: false,
     locationResult: null,
     destination: null,
+    duration: null,
+    myLocation: null,
   };
 
   componentDidMount () {
@@ -35,10 +40,17 @@ export default class Map extends Component {
     }
 
     let location = await Location.getCurrentPositionAsync({});
+    // console.log(location.coords.latitude)
+    const response = await Geocoder.from (location.coords.latitude, location.coords.longitude);
+    const address = response.results[0].formatted_address;
+    const myLocation = address.substring(0, address.indexOf(','));
+    console.log(myLocation);
     this.setState({ locationResult: JSON.stringify(location) });
 
     // Center the map on the location we just fetched.
-     this.setState({region: { latitude: location.coords.latitude, longitude: location.coords.longitude, latitudeDelta: 0.0922, longitudeDelta: 0.0421 }});
+    this.setState({myLocation, region: { latitude: location.coords.latitude, longitude: location.coords.longitude, latitudeDelta: 0.0922, longitudeDelta: 0.0421 }});
+
+     
    };
 
   handleLocationSelected = (data, {geometry}) => {
@@ -50,7 +62,13 @@ export default class Map extends Component {
         title: data.structured_formatting.main_text,
       }
     })
-    }
+  }
+
+  handleBack = () => {
+    this.setState({
+      destination: null
+    })
+  }
 
   render () {
     return (
@@ -87,6 +105,7 @@ export default class Map extends Component {
                       apikey="AIzaSyDJlJg5YjzbBYktHJynrpzBxw0v-xqXjSw"
                       destination={this.state.destination}
                       onReady = {result => {
+                        this.setState({duration: Math.floor(result.duration)})
                         this.mapView.fitToCoordinates(result.coordinates, {
                           edgePadding: {
                             right: getPixelSize(50),
@@ -113,16 +132,28 @@ export default class Map extends Component {
                       >
                       <LocationBox>
                         <LocationTimeBox>
-                          <LocationTimeText>15</LocationTimeText>
+                          <LocationTimeText>{this.state.duration}</LocationTimeText>
                           <LocationTimeTextSmall>MIN</LocationTimeTextSmall>
                         </LocationTimeBox>
-                        <LocationText>Rua Sao Mauricio</LocationText>
+                        <LocationText>{this.state.myLocation}</LocationText>
                       </LocationBox>
                     </MapView.Marker>
                   </Fragment>
                 )}
               </MapView>
+
+              {this.state.destination ? (
+                <Fragment>
+                  <Back onPress={this.handleBack}>
+                    <Image source ={backImage} />
+                  </Back>
+                  <Details />
+                </Fragment>
+                
+              ) : (
               <Search onLocationSelected ={this.handleLocationSelected}/>
+              )}
+              
             </View>
         }
       </React.Fragment>
