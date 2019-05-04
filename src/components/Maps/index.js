@@ -1,10 +1,12 @@
-import React, {Component} from 'react';
+import React, {Component, Fragment} from 'react';
 import { MapView, Location, Permissions } from 'expo';
 import { View, Text} from 'react-native';
 import Search from '../Search';
 // import Directions from '../Directions';
 import { getPixelSize } from '../../utils'
 import MapViewDirections from '../Directions';
+import {LocationBox, LocationText, LocationTimeText, LocationTimeTextSmall, LocationTimeBox} from './styles'
+import markerImage from '../../../assets/marker.png'
 
 export default class Map extends Component {
   state = {
@@ -34,18 +36,6 @@ export default class Map extends Component {
 
     let location = await Location.getCurrentPositionAsync({});
     this.setState({ locationResult: JSON.stringify(location) });
-
-    // navigator.geolocation.getCurrentPosition(
-    //   ({coords : {latitude, longitude}}) => {
-    //     this.setState({region: {latitude, longitude, latitudeDelta: 0.0922, longitudeDelta: 0.0421}})
-    //   },
-    //   () => {},
-    //   {
-    //     timeout: 2000,
-    //     enableHighAccuracy: true,
-    //     maximumAge: 1000,
-    //   }
-    // )
 
     // Center the map on the location we just fetched.
      this.setState({region: { latitude: location.coords.latitude, longitude: location.coords.longitude, latitudeDelta: 0.0922, longitudeDelta: 0.0421 }});
@@ -91,21 +81,45 @@ export default class Map extends Component {
                 ref = {el => this.mapView = el}
               >
                 {this.state.destination && (
-                  <MapViewDirections 
-                    origin={this.state.region}
-                    apikey="AIzaSyDJlJg5YjzbBYktHJynrpzBxw0v-xqXjSw"
-                    destination={this.state.destination}
-                    onReady = {result => {
-                      this.mapView.fitToCoordinates(result.coordinates, {
-                        edgePadding: {
-                          right: getPixelSize(50),
-                          left: getPixelSize(50),
-                          top: getPixelSize(50), 
-                          bottom: getPixelSize(50) 
-                        }
-                      });
-                    }}
-                  />
+                  <Fragment>
+                    <MapViewDirections 
+                      origin={this.state.region}
+                      apikey="AIzaSyDJlJg5YjzbBYktHJynrpzBxw0v-xqXjSw"
+                      destination={this.state.destination}
+                      onReady = {result => {
+                        this.mapView.fitToCoordinates(result.coordinates, {
+                          edgePadding: {
+                            right: getPixelSize(50),
+                            left: getPixelSize(50),
+                            top: getPixelSize(50), 
+                            bottom: getPixelSize(50) 
+                          },
+                          animated: true
+                        });
+                      }}
+                    />
+                    <MapView.Marker
+                        coordinate={this.state.destination}
+                        anchor= {{x: 0, y: 0}}
+                        image={markerImage}>
+                      <LocationBox>
+                        <LocationText>{this.state.destination.title}</LocationText>
+                      </LocationBox>
+                    </MapView.Marker>
+
+                    <MapView.Marker
+                        coordinate={this.state.region}
+                        anchor= {{x: 0, y: 0}}
+                      >
+                      <LocationBox>
+                        <LocationTimeBox>
+                          <LocationTimeText>15</LocationTimeText>
+                          <LocationTimeTextSmall>MIN</LocationTimeTextSmall>
+                        </LocationTimeBox>
+                        <LocationText>Rua Sao Mauricio</LocationText>
+                      </LocationBox>
+                    </MapView.Marker>
+                  </Fragment>
                 )}
               </MapView>
               <Search onLocationSelected ={this.handleLocationSelected}/>
